@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+CXX_FLAGS="-std=c++20 -Wall -Wextra -Wpedantic"
+C_FLAGS="-std=c17 -Wall -Wextra"
+
+created_bin=""
+
+cleanup() {
+  if [[ -n "$created_bin" && -f "$created_bin" ]]; then
+    rm -f "$created_bin"
+  fi
+}
+trap cleanup EXIT
+
+target="$1"
+shift || true
+ARGS="$@"
+
+if [[ -z "$target" ]]; then
+  echo "usage: run <file>"
+  exit 1
+fi
+
+target="$(realpath "$target")"
+dir="$(dirname "$target")"
+base="$(basename "$target")"
+name="${base%.*}"
+bin="$dir/$name"
+
+case "$target" in
+*.cpp)
+  g++ $CXX_FLAGS "$target" -o "$bin"
+  created_bin="$bin"
+  "$bin" $ARGS
+  ;;
+*.c)
+  gcc $C_FLAGS "$target" -o "$bin"
+  created_bin="$bin"
+  "$bin" $ARGS
+  ;;
+*.py)
+  python3 "$target" $ARGS
+  ;;
+*.js)
+  node "$target" $ARGS
+  ;;
+*)
+  echo "run: unsupported file type"
+  exit 1
+  ;;
+esac
