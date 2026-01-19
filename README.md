@@ -1,5 +1,3 @@
-cat << 'EOF' > README.md
-
 # run
 
 A tiny universal runner for C, C++, Python, and JavaScript.
